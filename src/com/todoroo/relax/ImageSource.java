@@ -20,7 +20,6 @@ public class ImageSource {
         String[] urls = new String[images.length()];
         for(int i = 0; i < images.length(); i++) {
             urls[i] = images.getJSONObject(i).getString("MediaUrl");
-            System.err.println("got " + urls[i]);
         }
         return urls;
     }
@@ -51,7 +50,6 @@ public class ImageSource {
         String request = createFetchUrl(getParameters);
         System.err.println(request);
         String response = restClient.get(request);
-        System.err.println(response);
         JSONObject wrapper = new JSONObject(response);
         return wrapper.getJSONObject("SearchResponse");
     }

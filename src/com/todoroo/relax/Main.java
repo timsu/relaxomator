@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -73,10 +76,11 @@ public class Main extends Activity {
                 if(current >= results.length)
                     loadMoreImages(total + 10);
                 loadResult(current);
+                precacheImages();
             }
         });
 
-        loadMoreImages(0);
+        loadMoreImages(total);
         loadResult(current);
     }
 
@@ -85,6 +89,7 @@ public class Main extends Activity {
         try {
             total = newTotal;
             results = imageSource.search("kitten", total);
+            precacheImages();
         } catch (Exception e) {
             Log.e("error", "loading images", e);
             loading.setText(e.toString());
@@ -94,7 +99,34 @@ public class Main extends Activity {
         current = 0;
     }
 
-    // ---
+    // --- precaching
+
+    private static final int MAX_ENTRIES = 5;
+
+    private Map<String, Bitmap> mCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(
+            MAX_ENTRIES, .75F, true) {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Bitmap> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    });
+
+    private void precacheImages() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = current + 1; i < current + 1 + MAX_ENTRIES && i < results.length ; i++) {
+                    try {
+                        fetch(results[i]);
+                    } catch (Exception e) {
+                        Log.e("error", "error",  e);
+                    }
+                }
+            }
+        }).start();
+    }
 
     // --- results loading
 
@@ -104,7 +136,7 @@ public class Main extends Activity {
         Preferences.setInt("total", total);
         Preferences.setInt("current", current);
 
-        previous.setEnabled(total > 0);
+        previous.setEnabled(total + current > 0);
         next.setEnabled(imageSource.hasMoreResults(total + current));
         text.setText(String.format("%d", total + current + 1));
 
@@ -117,6 +149,7 @@ public class Main extends Activity {
             public void run() {
                 try {
                     final Bitmap bitmap = fetch(results[i]);
+
                     if(Thread.interrupted())
                         return;
                     runOnUiThread(new Runnable() {
@@ -143,7 +176,11 @@ public class Main extends Activity {
      * @return
      */
     public Bitmap fetch(String urlString) throws IOException {
+        if(mCache.containsKey(urlString))
+            return mCache.get(urlString);
+
         URL url = new URL(urlString);
+        System.err.println("fetching " + urlString);
 
         InputStream is = null;
         Bitmap bitmap = null;
@@ -152,6 +189,7 @@ public class Main extends Activity {
             conn.connect();
             is = conn.getInputStream();
             int contentLength = conn.getContentLength();
+            contentLength = Math.min(contentLength, 300000);
 
             // write bytes to output stream
             byte[] bytes = new byte[contentLength];
@@ -169,7 +207,7 @@ public class Main extends Activity {
             if(is != null)
                 is.close();
         }
-
+        mCache.put(urlString, bitmap);
         return bitmap;
     }
 }
