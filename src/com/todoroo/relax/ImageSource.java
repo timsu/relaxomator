@@ -15,7 +15,7 @@ public class ImageSource {
     public String[] search(String query, int current) throws IOException, JSONException {
         JSONObject results =
             invokeGet("Query", query, "Sources", "Image",
-                    "Offset", Integer.toString(current));
+                    "Image.Offset", Integer.toString(current));
         JSONArray images = results.getJSONObject("Image").getJSONArray("Results");
         String[] urls = new String[images.length()];
         for(int i = 0; i < images.length(); i++) {
@@ -49,7 +49,9 @@ public class ImageSource {
     private JSONObject invokeGet(String... getParameters)
             throws IOException, JSONException {
         String request = createFetchUrl(getParameters);
+        System.err.println(request);
         String response = restClient.get(request);
+        System.err.println(response);
         JSONObject wrapper = new JSONObject(response);
         return wrapper.getJSONObject("SearchResponse");
     }

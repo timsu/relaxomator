@@ -65,7 +65,7 @@ public class Main extends Activity {
     private void loadMoreImages() {
         try {
             total += current;
-            results = imageSource.search("cat", total);
+            results = imageSource.search("kitty", total);
         } catch (Exception e) {
             Log.e("error", "loading images", e);
             loading.setText(e.toString());
@@ -86,6 +86,8 @@ public class Main extends Activity {
         outState.putInt("current", current);
     }
 
+    Thread loadingThread = null;
+
     private void loadResult(final int i) {
         previous.setEnabled(i > 0);
         next.setEnabled(imageSource.hasMoreResults(total + current));
@@ -93,11 +95,15 @@ public class Main extends Activity {
 
         loading.setVisibility(View.VISIBLE);
 
-        new Thread(new Runnable() {
+        if(loadingThread != null)
+            loadingThread.interrupt();
+        loadingThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     final Bitmap bitmap = fetch(results[i]);
+                    if(Thread.interrupted())
+                        return;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -110,7 +116,8 @@ public class Main extends Activity {
                     Log.e("error", "error",  e);
                 }
             }
-        }).start();
+        });
+        loadingThread.start();
     }
 
     /**
