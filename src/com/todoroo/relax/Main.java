@@ -65,7 +65,7 @@ public class Main extends Activity {
                     if(results.length > 0)
                         current = results.length - 1;
                 }
-                loadResult(current);
+                loadResult();
             }
         });
 
@@ -75,13 +75,15 @@ public class Main extends Activity {
                 current++;
                 if(current >= results.length)
                     loadMoreImages(total + 10);
-                loadResult(current);
+                loadResult();
                 precacheImages();
             }
         });
 
+        int oldCurrent = current;
         loadMoreImages(total);
-        loadResult(current);
+        current = oldCurrent;
+        loadResult();
     }
 
     private void loadMoreImages(int newTotal) {
@@ -132,7 +134,7 @@ public class Main extends Activity {
 
     private Thread loadingThread = null;
 
-    private void loadResult(final int i) {
+    private void loadResult() {
         Preferences.setInt("total", total);
         Preferences.setInt("current", current);
 
@@ -148,7 +150,7 @@ public class Main extends Activity {
             @Override
             public void run() {
                 try {
-                    final Bitmap bitmap = fetch(results[i]);
+                    final Bitmap bitmap = fetch(results[current]);
 
                     if(Thread.interrupted())
                         return;
