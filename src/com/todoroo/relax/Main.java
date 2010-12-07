@@ -103,7 +103,7 @@ public class Main extends Activity {
 
     // --- precaching
 
-    private static final int MAX_ENTRIES = 5;
+    private static final int MAX_ENTRIES = 10;
 
     private Map<String, Bitmap> mCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(
             MAX_ENTRIES, .75F, true) {
@@ -122,7 +122,7 @@ public class Main extends Activity {
                 for(int i = current + 1; i < current + 1 + MAX_ENTRIES && i < results.length ; i++) {
                     try {
                         fetch(results[i]);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         Log.e("error", "error",  e);
                     }
                 }
@@ -162,7 +162,7 @@ public class Main extends Activity {
                         }
                     });
 
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     Log.e("error", "error",  e);
                 }
             }
@@ -191,20 +191,20 @@ public class Main extends Activity {
             conn.connect();
             is = conn.getInputStream();
             int contentLength = conn.getContentLength();
-            contentLength = Math.min(contentLength, 300000);
+            if(contentLength < 400000) {
+                // write bytes to output stream
+                byte[] bytes = new byte[contentLength];
+                int offset = 0;
+                while(true) {
+                    int byteCount = is.read(bytes, offset, contentLength - offset);
+                    if(byteCount == -1)
+                        break;
+                    else
+                        offset += byteCount;
+                }
 
-            // write bytes to output stream
-            byte[] bytes = new byte[contentLength];
-            int offset = 0;
-            while(true) {
-                int byteCount = is.read(bytes, offset, contentLength - offset);
-                if(byteCount == -1)
-                    break;
-                else
-                    offset += byteCount;
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             }
-
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         } finally {
             if(is != null)
                 is.close();
