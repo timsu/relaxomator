@@ -1,13 +1,9 @@
 package com.todoroo.relax;
 
-import gsearch.Client;
-import gsearch.Result;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -21,8 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class Main extends Activity {
-    private List<Result> results;
-    private int current = 0;
+    private int current = 0, total = 0;
+    ImageSource imageSource;
+    String[] results;
 
     private ImageButton previous, next;
     private ImageView image;
@@ -35,15 +32,13 @@ public class Main extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        Client client = new Client();
-        results = client.searchImagesPlus("cat", 60).getResults();
+        imageSource = new ImageSource();
 
         previous = (ImageButton) findViewById(R.id.prev);
         next = (ImageButton) findViewById(R.id.next);
         image = (ImageView) findViewById(R.id.image);
         text = (TextView) findViewById(R.id.text);
         loading = (TextView) findViewById(R.id.loading);
-        loadResult(current);
 
         previous.setOnClickListener(new OnClickListener() {
             @Override
@@ -57,10 +52,26 @@ public class Main extends Activity {
             @Override
             public void onClick(View arg0) {
                 current++;
+                if(current >= results.length)
+                    loadMoreImages();
                 loadResult(current);
             }
         });
 
+        loadMoreImages();
+        loadResult(current);
+    }
+
+    private void loadMoreImages() {
+        try {
+            total += current;
+            results = imageSource.search("cat", total);
+        } catch (Exception e) {
+            Log.e("error", "loading images", e);
+            loading.setText(e.toString());
+            results = new String[0];
+        }
+        current = 0;
     }
 
     @Override
@@ -77,8 +88,8 @@ public class Main extends Activity {
 
     private void loadResult(final int i) {
         previous.setEnabled(i > 0);
-        next.setEnabled(i < results.size() - 1);
-        text.setText(String.format("Showing %d of %d", i+1, results.size()));
+        next.setEnabled(imageSource.hasMoreResults(total + current));
+        text.setText(String.format("%d", total + current));
 
         loading.setVisibility(View.VISIBLE);
 
@@ -86,7 +97,7 @@ public class Main extends Activity {
             @Override
             public void run() {
                 try {
-                    final Bitmap bitmap = fetch(results.get(i).getUnescapedUrl());
+                    final Bitmap bitmap = fetch(results[i]);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

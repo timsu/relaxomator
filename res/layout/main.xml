@@ -1,53 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <LinearLayout  
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" 
-        android:orientation="horizontal">
-    
-        <ImageButton android:id="@+id/prev"
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_weight="1"
-            android:background="#00000000"
-            android:src="@drawable/previous"/>
                 
-        <TextView android:id="@+id/text"
-            android:layout_width="fill_parent" 
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:layout_weight="98" />
-    
-        <ImageButton android:id="@+id/next"
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content" 
-            android:layout_weight="1"
-            android:background="#00000000"
-            android:src="@drawable/next"/>
-        
-    </LinearLayout>
-    
-    <FrameLayout
+    <ImageView android:id="@+id/image"
         android:layout_width="fill_parent" 
-        android:layout_height="fill_parent">
-        
-        <ImageView android:id="@+id/image"
-            android:layout_width="fill_parent" 
-            android:layout_height="fill_parent" 
-            android:scaleType="fitCenter"/>
+        android:layout_height="fill_parent" 
+        android:scaleType="fitCenter"/>
+
+    <TextView android:id="@+id/loading"
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+        android:background="#aa000000"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:text="Loading..." />
     
-        <TextView android:id="@+id/loading"
-            android:layout_width="fill_parent" 
-            android:layout_height="fill_parent" 
-            android:background="#aa000000"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:text="Loading..." />
+    <ImageButton android:id="@+id/prev"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true" 
+        android:layout_alignParentTop="true" 
+        android:background="#00000000"
+        android:src="@drawable/previous"/>
                 
-    </FrameLayout> 
+    <TextView android:id="@+id/text"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true" 
+        android:layout_alignParentBottom="true" 
+        android:gravity="center"
+        android:textSize="16sp" />
+    
+    <ImageButton android:id="@+id/next"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true" 
+        android:layout_alignParentTop="true" 
+        android:background="#00000000"
+        android:src="@drawable/next"/>
         
-</LinearLayout>
+</RelativeLayout>
