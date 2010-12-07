@@ -13,12 +13,13 @@
             android:layout_height="wrap_content" 
             android:layout_weight="1"
             android:background="#00000000"
-            android:src="@android:drawable/ic_media_rew"/>
+            android:src="@drawable/previous"/>
                 
         <TextView android:id="@+id/text"
             android:layout_width="fill_parent" 
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:gravity="center"
+            android:textSize="16sp"
             android:layout_weight="98" />
     
         <ImageButton android:id="@+id/next"
@@ -26,7 +27,7 @@
             android:layout_height="wrap_content" 
             android:layout_weight="1"
             android:background="#00000000"
-            android:src="@android:drawable/ic_media_ff"/>
+            android:src="@drawable/next"/>
         
     </LinearLayout>
     
@@ -43,6 +44,8 @@
             android:layout_width="fill_parent" 
             android:layout_height="fill_parent" 
             android:background="#aa000000"
+            android:textSize="24sp"
+            android:gravity="center"
             android:text="Loading..." />
                 
     </FrameLayout> 

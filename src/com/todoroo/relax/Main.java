@@ -43,7 +43,7 @@ public class Main extends Activity {
         image = (ImageView) findViewById(R.id.image);
         text = (TextView) findViewById(R.id.text);
         loading = (TextView) findViewById(R.id.loading);
-        loadResult(0);
+        loadResult(current);
 
         previous.setOnClickListener(new OnClickListener() {
             @Override
@@ -61,6 +61,18 @@ public class Main extends Activity {
             }
         });
 
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        current = savedInstanceState.getInt("current", 0);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("current", current);
     }
 
     private void loadResult(final int i) {
