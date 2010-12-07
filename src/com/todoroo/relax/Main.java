@@ -11,6 +11,7 @@ import java.util.Map;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -103,7 +104,7 @@ public class Main extends Activity {
 
     // --- precaching
 
-    private static final int MAX_ENTRIES = 10;
+    private static final int MAX_ENTRIES = 5;
 
     private Map<String, Bitmap> mCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(
             MAX_ENTRIES, .75F, true) {
@@ -204,6 +205,8 @@ public class Main extends Activity {
                 }
 
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            } else {
+                bitmap = ((BitmapDrawable)getResources().getDrawable(R.drawable.icon)).getBitmap();
             }
         } finally {
             if(is != null)
