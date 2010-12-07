@@ -12,12 +12,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.todoroo.andlib.service.ContextManager;
+import com.todoroo.andlib.utility.Preferences;
+
 public class Main extends Activity {
-    private int current = 0, total = 0;
+    private int current, total;
     ImageSource imageSource;
     String[] results;
 
@@ -29,10 +34,18 @@ public class Main extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        final Window win = getWindow();
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        ContextManager.setContext(this);
         setContentView(R.layout.main);
 
         imageSource = new ImageSource();
+
+        current = Preferences.getInt("current", 0);
+        total= Preferences.getInt("total", 0);
 
         previous = (ImageButton) findViewById(R.id.prev);
         next = (ImageButton) findViewById(R.id.next);
@@ -44,6 +57,11 @@ public class Main extends Activity {
             @Override
             public void onClick(View arg0) {
                 current--;
+                if(current < 0) {
+                    loadMoreImages(total - 10);
+                    if(results.length > 0)
+                        current = results.length - 1;
+                }
                 loadResult(current);
             }
         });
@@ -53,45 +71,42 @@ public class Main extends Activity {
             public void onClick(View arg0) {
                 current++;
                 if(current >= results.length)
-                    loadMoreImages();
+                    loadMoreImages(total + 10);
                 loadResult(current);
             }
         });
 
-        loadMoreImages();
+        loadMoreImages(0);
         loadResult(current);
     }
 
-    private void loadMoreImages() {
+    private void loadMoreImages(int newTotal) {
+        int oldTotal = total;
         try {
-            total += current;
-            results = imageSource.search("kitty", total);
+            total = newTotal;
+            results = imageSource.search("kitten", total);
         } catch (Exception e) {
             Log.e("error", "loading images", e);
             loading.setText(e.toString());
             results = new String[0];
+            total = oldTotal;
         }
         current = 0;
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        current = savedInstanceState.getInt("current", 0);
-    }
+    // ---
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("current", current);
-    }
+    // --- results loading
 
-    Thread loadingThread = null;
+    private Thread loadingThread = null;
 
     private void loadResult(final int i) {
-        previous.setEnabled(i > 0);
+        Preferences.setInt("total", total);
+        Preferences.setInt("current", current);
+
+        previous.setEnabled(total > 0);
         next.setEnabled(imageSource.hasMoreResults(total + current));
-        text.setText(String.format("%d", total + current));
+        text.setText(String.format("%d", total + current + 1));
 
         loading.setVisibility(View.VISIBLE);
 
